@@ -51,9 +51,17 @@ namespace ASPCoreReactRefluxInTypeScript
 
             app.UseMvc(routes =>
             {
+                //Leave a route in for calling the backend API
                 routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    name: "API",
+                    template: "api/{controller=Home}/{action=Index}/{id?}");
+
+                //But the rest will fall through to the React front end.
+                routes.MapRoute(
+                    "React",
+                    "{*url}",
+                    new { controller = "Home", action = "Index" }
+                );
             });
         }
     }
