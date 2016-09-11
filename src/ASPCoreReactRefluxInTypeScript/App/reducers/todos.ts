@@ -1,0 +1,61 @@
+﻿import { assign } from 'lodash';
+import { handleActions, Action } from 'redux-actions';
+
+//import { Todo, State } from './model';
+import {
+    ADD_TODO,
+    DELETE_TODO,
+    EDIT_TODO,
+    COMPLETE_TODO,
+    COMPLETE_ALL,
+    CLEAR_COMPLETED
+} from './actions';
+
+const initialState: State = [<Todo>{
+    text: 'Use Redux with TypeScript',
+    completed: false,
+    id: 0
+}];
+
+export default handleActions<State>({
+    [ADD_TODO]: (state: State, action: Action): State => {
+        return [{
+            id: state.reduce((maxId, todo) => Math.max(todo.id, maxId), -1) + 1,
+            completed: action.payload.completed,
+            text: action.payload.text
+        }, ...state];
+    },
+
+    [DELETE_TODO]: (state: State, action: Action): State => {
+        return state.filter(todo =>
+            todo.id !== action.payload.id
+        );
+    },
+
+    [EDIT_TODO]: (state: State, action: Action): State => {
+        return <State>state.map(todo =>
+            todo.id === action.payload.id
+                ? assign(<Todo>{}, todo, { text: action.payload.text })
+                : todo
+        );
+    },
+
+    [COMPLETE_TODO]: (state: State, action: Action): State => {
+        return <State>state.map(todo =>
+            todo.id === action.payload.id ?
+                assign({}, todo, { completed: !todo.completed }) :
+                todo
+        );
+    },
+
+    [COMPLETE_ALL]: (state: State, action: Action): State => {
+        const areAllMarked = state.every(todo => todo.completed);
+        return <State>state.map(todo => assign({}, todo, {
+            completed: !areAllMarked
+        }));
+    },
+
+    [CLEAR_COMPLETED]: (state: State, action: Action): State => {
+        return state.filter(todo => todo.completed === false);
+    }
+}, initialState);
